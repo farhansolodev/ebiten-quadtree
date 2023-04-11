@@ -7,35 +7,35 @@ type QNode struct {
 	northeast       *QNode
 	southwest       *QNode
 	southeast       *QNode
-	startH, endH, startV, endV float32
+	x0, x1, y0, y1 float32
 	depth uint
 }
 
-func NewQNode(startH, endH, startV, endV float32, depth uint) *QNode {
-	return &QNode{nil, nil, nil, nil, startH, endH, startV, endV, depth}
+func NewQNode(x0, x1, y0, y1 float32, depth uint) *QNode {
+	return &QNode{nil, nil, nil, nil, x0, x1, y0, y1, depth}
 }
 
 func (node *QNode) makeNorthWest() *QNode {
 	midX, midY := node.getMidValues()
-	node.northwest = NewQNode(node.startH, midX, node.startV, midY, node.depth+1)
+	node.northwest = NewQNode(node.x0, midX, node.y0, midY, node.depth+1)
 	return node.northwest
 }
 
 func (node *QNode) makeNorthEast() *QNode {
 	midX, midY := node.getMidValues()
-	node.northeast = NewQNode(midX, node.endH, node.startV, midY, node.depth+1)
+	node.northeast = NewQNode(midX, node.x1, node.y0, midY, node.depth+1)
 	return node.northeast
 }
 
 func (node *QNode) makeSouthWest() *QNode {
 	midX, midY := node.getMidValues()
-	node.southwest = NewQNode(node.startH, midX, midY, node.endV, node.depth+1)
+	node.southwest = NewQNode(node.x0, midX, midY, node.y1, node.depth+1)
 	return node.southwest
 }
 
 func (node *QNode) makeSouthEast() *QNode {
 	midX, midY := node.getMidValues()
-	node.southeast = NewQNode(midX, node.endH, midY, node.endV, node.depth+1)
+	node.southeast = NewQNode(midX, node.x1, midY, node.y1, node.depth+1)
 	return node.southeast
 }
 
@@ -109,7 +109,7 @@ func (node *QNode) collapse(x, y float32, maxDepth uint) {
 }
 
 func (node *QNode) getMidValues() (x, y float32) {
-	return (node.startH+node.endH)*0.5, (node.startV+node.endV)*0.5
+	return (node.x0+node.x1)*0.5, (node.y0+node.y1)*0.5
 }
 
 func (node *QNode) String() string {
