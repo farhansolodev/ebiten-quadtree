@@ -13,9 +13,9 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
-	// width, height := ebiten.WindowSize()
-	// g.root.endH = float32(width)
-	// g.root.endV = float32(height)
+	width, height := ebiten.WindowSize()
+	g.root.endH = float32(width)
+	g.root.endV = float32(height)
 
 	x, y := ebiten.CursorPosition()
 	if x < 0 || x > int(g.root.endH) || y < 0 || y > int(g.root.endV) { return nil }
@@ -69,7 +69,6 @@ func (g *Game) Update() error {
 
 	}, g.maxDepth)
 
-	g = &Game{ root: NewQNode(0, g.root.endH, 0, g.root.endV, 0), maxDepth: 0 }
 	return nil
 }
 
