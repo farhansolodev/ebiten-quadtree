@@ -20,64 +20,17 @@ func (g *Game) Update() error {
 	x, y := ebiten.CursorPosition()
 	if x < 0 || x > int(g.root.endH) || y < 0 || y > int(g.root.endV) { return nil }
 
-	g.root.forEveryNode(func (node *QNode) {
-		midX, midY := node.getMidValues()
-
-		// 1st quadrant
-		if x < int(midX) && y < int(midY) {
-			if node.one == nil {
-				node.birthAt1()
-			}
-			node.two = nil
-			node.three = nil
-			node.four = nil
-			return
-		}
-
-		// 2nd quadrant
-		if x > int(midX) && y < int(midY) {
-			if node.two == nil {
-				node.birthAt2()
-			}
-			node.one = nil
-			node.three = nil
-			node.four = nil
-			return
-		}
-
-		// 3rd quadrant
-		if x < int(midX) && y > int(midY) {
-			if node.three == nil {
-				node.birthAt3()
-			}
-			node.one = nil
-			node.two = nil
-			node.four = nil
-			return
-		}
-
-		// if 4th quadrant
-		if x > int(midX) && y > int(midY) {
-			if node.four == nil {
-				node.birthAt4()
-			}
-			node.one = nil
-			node.two = nil
-			node.three = nil
-			return
-		}
-
-	}, g.maxDepth)
-
+	g.root.collapse(float32(x), float32(y), g.maxDepth)
+	
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	const lineThickness = 1
-	if g.root.one == nil && g.root.two == nil && g.root.three == nil && g.root.four == nil {
+	if g.root.northwest == nil && g.root.northeast == nil && g.root.southwest == nil && g.root.southeast == nil {
 		return
 	}
-	g.root.forEveryNode(func (node *QNode) {
+	g.root.forEach(func (node *QNode) {
 		midX, midY := node.getMidValues()
 		vector.StrokeLine(screen, node.startH, midY, node.endH, midY, lineThickness, color.White, false)
 		vector.StrokeLine(screen, midX, node.startV, midX, node.endV, lineThickness, color.White, false)
