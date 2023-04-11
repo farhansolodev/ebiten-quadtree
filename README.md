@@ -1,7 +1,8 @@
 # ebiten-quadtree
-Quadtree visualization in Go
+##Quadtree visualization in Go 
 
-Run the demo using:
+
+You can clone and build the program, or run it by entering the following in your terminal: 
 `go run github.com/farhansolodev/ebiten-quadtree@latest`
 
 View CLI flags by running the above with the `--help`, `-help`, `--h` or `-h` flag
