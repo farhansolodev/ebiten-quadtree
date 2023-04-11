@@ -1,5 +1,5 @@
 # ebiten-quadtree
-##Quadtree visualization in Go 
+## Quadtree visualization in Go 
 
 
 You can clone and build the program, or run it by entering the following in your terminal: 
