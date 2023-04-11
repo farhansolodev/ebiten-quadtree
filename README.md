@@ -5,4 +5,4 @@ You can run the binary release, clone and build the program, or run it by enteri
 
 `go run github.com/farhansolodev/ebiten-quadtree@latest`
 
-View CLI flags by running the above with the `--help`, `-help`, `--h` or `-h` flag
+View CLI flags by passing the `--help`, `-help`, `--h` or `-h` flag
