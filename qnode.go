@@ -6,9 +6,9 @@ import (
 )
 
 type QNode struct {
-	northwest, northeast, southwest, southeast  *QNode
-	x0, 	   x1, 	 	  y0, 		 y1 		float32
-	depth 										uint
+	northwest, northeast, southwest, southeast *QNode
+	x0, x1, y0, y1 float32
+	depth uint
 }
 
 func NewQNode(x0, x1, y0, y1 float32, depth uint) *QNode {
