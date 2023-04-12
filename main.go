@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -19,7 +20,7 @@ func main() {
 
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	if *resizable { ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled) }
-	ebiten.SetWindowTitle("ebiten-quadtree")
+	ebiten.SetWindowTitle(os.Args[0])
 	
 	game := Game{ root: NewQNode(0, screenWidth, 0, screenHeight, 0), maxDepth: *maxDepth }
 
