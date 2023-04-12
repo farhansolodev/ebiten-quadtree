@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type QNode struct {
 	northwest		*QNode
@@ -113,6 +116,10 @@ func (node *QNode) getMidValues() (x, y float32) {
 }
 
 func (node *QNode) String() string {
-	midX, midY := node.getMidValues()
-	return fmt.Sprintf("[Node: (%f, %f)]", midY, midX)
+	var sb strings.Builder
+	node.forEach(func (node *QNode) {		
+		midX, midY := node.getMidValues()
+		sb.WriteString(fmt.Sprintf("%s[Node: (%f, %f)]\n", strings.Repeat("-> ", int(node.depth)), midX, midY))
+	}, 10)
+	return sb.String()
 }
