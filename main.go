@@ -13,7 +13,7 @@ const (
 )
 
 func main() {
-	maxDepth := flag.Uint("depth", 8, "set your own maximum quadtree depth")
+	maxDepth := flag.Uint("depth", 7, "set your own maximum quadtree depth")
 	resizable := flag.Bool("resize", false, "should window be resizable? [true|false] (still experimental) (default false)")
 	flag.Parse()
 

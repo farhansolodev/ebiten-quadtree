@@ -40,7 +40,7 @@ func (node *QNode) makeSouthEast() *QNode {
 }
 
 func (node *QNode) forEach(cb func(node *QNode), maxDepth uint) {
-	if node.depth == maxDepth {
+	if node.depth > maxDepth {
 		return
 	}
 	
