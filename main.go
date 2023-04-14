@@ -4,27 +4,38 @@ import (
 	"flag"
 	"log"
 	"os"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 const (
-	screenWidth  = 1280
-	screenHeight = 720
+	initialScreenWidth  = 1280
+	initialScreenHeight = 720
 )
 
 func main() {
 	maxDepth := flag.Uint("depth", 7, "set your own maximum quadtree depth")
-	resizable := flag.Bool("resize", false, "should window be resizable? [true|false] (still experimental) (default false)")
+	spriteCount := flag.Uint("sprites", 250, "how many sprites do you want?")
+	// resizable := flag.Bool("resize", false, "should window be resizable? [true|false] (still experimental) (default false)")
 	flag.Parse()
 
-	ebiten.SetWindowSize(screenWidth, screenHeight)
-	if *resizable { ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled) }
+	ebiten.SetWindowSize(initialScreenWidth, initialScreenHeight)
+	// if *resizable { ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled) }
 	ebiten.SetWindowTitle(os.Args[0])
 	
-	game := Game{ root: NewQNode(0, screenWidth, 0, screenHeight, 0), maxDepth: *maxDepth }
+	sprites := make([]*Sprite, 0, *spriteCount)
+	var i uint
+	for ; i < *spriteCount; i++ {
+		sprites = append(sprites, NewSprite(int64(i) + time.Now().UnixNano()))
+	}
 
-	if err := ebiten.RunGame(&game); err != nil {
+	root := NewQNode(nil, sprites, 0, initialScreenWidth, 0, initialScreenHeight, 0)
+	root.generateTree(*maxDepth)
+
+	game := &Game[*Sprite]{root, *maxDepth}
+
+	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
 }
