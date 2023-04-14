@@ -7,33 +7,57 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-type Game struct {
-	root *QNode
+type Game[T Locatable] struct {
+	root *QNode[T]
+	// cursorTree *QNode[C]
+	// datapoints []T
 	maxDepth uint
 }
 
-func (g *Game) Update() error {
-	width, height := ebiten.WindowSize()
-	g.root.x1 = float32(width)
-	g.root.y1 = float32(height)
+func (g *Game[T]) Update() error {
+	g.root.forEach(func (node *QNode[T]) bool {
+		if node.marked {
+			node.marked = false
+			return node.marked
+		}
+		return true
+	}, g.maxDepth)
 
+	// width, height := ebiten.WindowSize()
 	x, y := ebiten.CursorPosition()
-	if x <= 0 || float32(x) > g.root.x1 || y <= 0 || float32(y) > g.root.y1 { return nil }
-
-	g.root.collapse(float32(x), float32(y), g.maxDepth)
-	
+	if x <= 0 || x > initialScreenWidth || y <= 0 || y > initialScreenHeight {
+		return nil
+	}
+	g.root.markPathTo(float32(x), float32(y))
 	return nil
 }
 
-func (g *Game) Draw(screen *ebiten.Image) {
-	const lineThickness = 1
-	g.root.forEach(func (node *QNode) {
+func (g *Game[T]) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return outsideWidth, outsideHeight
+}
+
+
+func (g *Game[T]) Draw(screen *ebiten.Image) {
+	for _, spr := range g.root.datapoints {
+		spr := any(spr).(*Sprite)
+		vector.DrawFilledCircle(screen, spr.x, spr.y, 1, spr.clr, true)
+		vector.StrokeCircle(screen, spr.x, spr.y, float32(spr.radius), 2, spr.clr, true)
+	}
+
+	width, height := ebiten.WindowSize()
+	x, y := ebiten.CursorPosition()
+	if x <= 0 || x > width || y <= 0 || y > height {
+		return
+	}
+
+	g.root.forEach(func (node *QNode[T]) bool {
+		if !node.marked {
+			return true
+		}
+		const lineThickness = 1
 		midX, midY := node.getMidValues()
 		vector.StrokeLine(screen, node.x0, midY, node.x1, midY, lineThickness, color.White, false)
 		vector.StrokeLine(screen, midX, node.y0, midX, node.y1, lineThickness, color.White, false)
+		return false
 	}, g.maxDepth)
-}
-
-func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return outsideWidth, outsideHeight
 }

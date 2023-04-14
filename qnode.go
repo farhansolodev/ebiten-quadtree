@@ -5,118 +5,146 @@ import (
 	"strings"
 )
 
-type QNode struct {
-	northwest, northeast, southwest, southeast *QNode
+type Locatable interface {
+	getPosition() (x, y float32)
+}
+
+type QNode[T Locatable] struct {
+	parent, northwest, northeast, southwest, southeast *QNode[T]
+	datapoints []T
+	marked bool
 	x0, x1, y0, y1 float32
 	depth uint
 }
 
-func NewQNode(x0, x1, y0, y1 float32, depth uint) *QNode {
-	return &QNode{nil, nil, nil, nil, x0, x1, y0, y1, depth}
+func NewQNode[T Locatable](parent *QNode[T], datapoints []T, x0, x1, y0, y1 float32, depth uint) *QNode[T] {
+	return &QNode[T]{parent, nil, nil, nil, nil, datapoints, false, x0, x1, y0, y1, depth}
 }
 
-func (node *QNode) makeNorthWest() *QNode {
+func (node *QNode[T]) makeNorthWest(datapoints []T) *QNode[T] {
 	midX, midY := node.getMidValues()
-	node.northwest = NewQNode(node.x0, midX, node.y0, midY, node.depth+1)
+	node.northwest = NewQNode(node, datapoints, node.x0, midX, node.y0, midY, node.depth+1)
 	return node.northwest
 }
 
-func (node *QNode) makeNorthEast() *QNode {
+func (node *QNode[T]) makeNorthEast(datapoints []T) *QNode[T] {
 	midX, midY := node.getMidValues()
-	node.northeast = NewQNode(midX, node.x1, node.y0, midY, node.depth+1)
+	node.northeast = NewQNode(node, datapoints, midX, node.x1, node.y0, midY, node.depth+1)
 	return node.northeast
 }
 
-func (node *QNode) makeSouthWest() *QNode {
+func (node *QNode[T]) makeSouthWest(datapoints []T) *QNode[T] {
 	midX, midY := node.getMidValues()
-	node.southwest = NewQNode(node.x0, midX, midY, node.y1, node.depth+1)
+	node.southwest = NewQNode(node, datapoints, node.x0, midX, midY, node.y1, node.depth+1)
 	return node.southwest
 }
 
-func (node *QNode) makeSouthEast() *QNode {
+func (node *QNode[T]) makeSouthEast(datapoints []T) *QNode[T] {
 	midX, midY := node.getMidValues()
-	node.southeast = NewQNode(midX, node.x1, midY, node.y1, node.depth+1)
+	node.southeast = NewQNode(node, datapoints, midX, node.x1, midY, node.y1, node.depth+1)
 	return node.southeast
 }
 
-func (node *QNode) forEach(cb func(node *QNode), maxDepth uint) {
+func (node *QNode[T]) forEach(skip func(node *QNode[T]) bool, maxDepth uint) {
 	if node.depth > maxDepth {
 		return
 	}
-	
-	cb(node)
+	if skip(node) {
+		return
+	}
 	if node.northwest != nil {
-		node.northwest.forEach(cb, maxDepth)
-	} else if node.northeast != nil {
-		node.northeast.forEach(cb, maxDepth)
-	} else if node.southwest != nil {
-		node.southwest.forEach(cb, maxDepth)
-	} else if node.southeast != nil {
-		node.southeast.forEach(cb, maxDepth)
+		node.northwest.forEach(skip, maxDepth)
+	}
+	if node.northeast != nil {
+		node.northeast.forEach(skip, maxDepth)
+	}
+	if node.southwest != nil {
+		node.southwest.forEach(skip, maxDepth)
+	}
+	if node.southeast != nil {
+		node.southeast.forEach(skip, maxDepth)
 	}
 }
 
-func (node *QNode) collapse(x, y float32, maxDepth uint) {
-	node.forEach(func (node *QNode) {
+func (node *QNode[T]) markPathTo(x, y float32) {
+		node.marked = true
 		midX, midY := node.getMidValues()
-
-		// 1st quadrant
 		if x < midX && y < midY {
 			if node.northwest == nil {
-				node.makeNorthWest()
+				return
 			}
-			node.northeast = nil
-			node.southwest = nil
-			node.southeast = nil
-			return
-		}
-
-		// 2nd quadrant
-		if x > midX && y < midY {
+			node.northwest.markPathTo(x, y)
+		} else if x > midX && y < midY {
 			if node.northeast == nil {
-				node.makeNorthEast()
+				return
 			}
-			node.northwest = nil
-			node.southwest = nil
-			node.southeast = nil
-			return
-		}
-
-		// 3rd quadrant
-		if x < midX && y > midY {
+			node.northeast.markPathTo(x, y)
+		} else if x < midX && y > midY {
 			if node.southwest == nil {
-				node.makeSouthWest()
+				return
 			}
-			node.northwest = nil
-			node.northeast = nil
-			node.southeast = nil
-			return
-		}
-
-		// if 4th quadrant
-		if x > midX && y > midY {
+			node.southwest.markPathTo(x, y)
+		} else if x > midX && y > midY {
 			if node.southeast == nil {
-				node.makeSouthEast()
+				return
 			}
-			node.northwest = nil
-			node.northeast = nil
-			node.southwest = nil
-			return
+			node.southeast.markPathTo(x, y)
 		}
-
-	}, maxDepth)
-
 }
 
-func (node *QNode) getMidValues() (x, y float32) {
+func (node *QNode[T]) generateTree(maxDepth uint) {
+	node.forEach(func (node *QNode[T]) bool {
+		nwDatapoints := make([]T, 0)
+		neDatapoints := make([]T, 0)
+		swDatapoints := make([]T, 0)
+		seDatapoints := make([]T, 0)
+		for _, v := range node.datapoints {
+			x, y := v.getPosition()
+			midX, midY := node.getMidValues()
+			if x < midX && y < midY {
+				nwDatapoints = append(nwDatapoints, v)
+			} else if x > midX && y < midY {
+				neDatapoints = append(neDatapoints, v)
+			} else if x < midX && y > midY {
+				swDatapoints = append(swDatapoints, v)
+			} else if x > midX && y > midY {
+				seDatapoints = append(seDatapoints, v)
+			}
+		}
+		noData := true
+		if len(nwDatapoints) != 0 {
+			noData = false
+			node.makeNorthWest(nwDatapoints)
+		}
+		if len(neDatapoints) != 0 {
+			noData = false
+			node.makeNorthEast(neDatapoints)
+		}
+		if len(swDatapoints) != 0 {
+			noData = false
+			node.makeSouthWest(swDatapoints)
+		}
+		if len(seDatapoints) != 0 {
+			noData = false
+			node.makeSouthEast(seDatapoints)
+		}
+		if noData {
+			return true
+		}
+		return false
+	}, maxDepth)
+}
+
+func (node *QNode[T]) getMidValues() (x, y float32) {
 	return (node.x0+node.x1)*0.5, (node.y0+node.y1)*0.5
 }
 
-func (node *QNode) String() string {
+func (node *QNode[T]) String() string {
 	var sb strings.Builder
-	node.forEach(func (node *QNode) {		
+	node.forEach(func (node *QNode[T]) bool {		
 		midX, midY := node.getMidValues()
 		sb.WriteString(fmt.Sprintf("%s[Node: (%f, %f)]\n", strings.Repeat("-> ", int(node.depth)), midX, midY))
+		return false
 	}, 10)
 	return sb.String()
 }
