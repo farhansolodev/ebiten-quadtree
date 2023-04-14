@@ -30,7 +30,7 @@ func main() {
 		sprites = append(sprites, NewSprite(int64(i) + time.Now().UnixNano()))
 	}
 
-	root := NewQNode(nil, sprites, 0, initialScreenWidth, 0, initialScreenHeight, 0)
+	root := NewQNode(sprites, 0, initialScreenWidth, 0, initialScreenHeight, 0)
 	root.generateTree(*maxDepth)
 
 	game := &Game[*Sprite]{root, *maxDepth}

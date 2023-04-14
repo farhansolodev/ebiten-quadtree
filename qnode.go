@@ -10,38 +10,38 @@ type Locatable interface {
 }
 
 type QNode[T Locatable] struct {
-	parent, northwest, northeast, southwest, southeast *QNode[T]
+	northwest, northeast, southwest, southeast *QNode[T]
 	datapoints []T
 	marked bool
 	x0, x1, y0, y1 float32
 	depth uint
 }
 
-func NewQNode[T Locatable](parent *QNode[T], datapoints []T, x0, x1, y0, y1 float32, depth uint) *QNode[T] {
-	return &QNode[T]{parent, nil, nil, nil, nil, datapoints, false, x0, x1, y0, y1, depth}
+func NewQNode[T Locatable](datapoints []T, x0, x1, y0, y1 float32, depth uint) *QNode[T] {
+	return &QNode[T]{nil, nil, nil, nil, datapoints, false, x0, x1, y0, y1, depth}
 }
 
 func (node *QNode[T]) makeNorthWest(datapoints []T) *QNode[T] {
 	midX, midY := node.getMidValues()
-	node.northwest = NewQNode(node, datapoints, node.x0, midX, node.y0, midY, node.depth+1)
+	node.northwest = NewQNode(datapoints, node.x0, midX, node.y0, midY, node.depth+1)
 	return node.northwest
 }
 
 func (node *QNode[T]) makeNorthEast(datapoints []T) *QNode[T] {
 	midX, midY := node.getMidValues()
-	node.northeast = NewQNode(node, datapoints, midX, node.x1, node.y0, midY, node.depth+1)
+	node.northeast = NewQNode(datapoints, midX, node.x1, node.y0, midY, node.depth+1)
 	return node.northeast
 }
 
 func (node *QNode[T]) makeSouthWest(datapoints []T) *QNode[T] {
 	midX, midY := node.getMidValues()
-	node.southwest = NewQNode(node, datapoints, node.x0, midX, midY, node.y1, node.depth+1)
+	node.southwest = NewQNode(datapoints, node.x0, midX, midY, node.y1, node.depth+1)
 	return node.southwest
 }
 
 func (node *QNode[T]) makeSouthEast(datapoints []T) *QNode[T] {
 	midX, midY := node.getMidValues()
-	node.southeast = NewQNode(node, datapoints, midX, node.x1, midY, node.y1, node.depth+1)
+	node.southeast = NewQNode(datapoints, midX, node.x1, midY, node.y1, node.depth+1)
 	return node.southeast
 }
 
