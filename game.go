@@ -10,15 +10,15 @@ import (
 	"golang.org/x/image/font/basicfont"
 )
 
-type Game[T Locatable] struct {
-	root *QNode[T]
+type Game struct {
+	root *QNode[*Sprite]
 	// cursorTree *QNode[C]
 	// datapoints []T
 	maxDepth uint
 }
 
-func (g *Game[T]) Update() error {
-	g.root.forEach(func (node *QNode[T]) bool {
+func (g *Game) Update() error {
+	g.root.forEach(func (node *QNode[*Sprite]) bool {
 		if node.marked {
 			node.marked = false
 			return node.marked
@@ -35,15 +35,15 @@ func (g *Game[T]) Update() error {
 	return nil
 }
 
-func (g *Game[T]) Layout(outsideWidth, outsideHeight int) (int, int) {
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return outsideWidth, outsideHeight
 }
 
 
-func (g *Game[T]) Draw(screen *ebiten.Image) {
+func (g *Game) Draw(screen *ebiten.Image) {
 	const strokeThickness = 1
 	for _, spr := range g.root.datapoints {
-		spr := any(spr).(*Sprite)
+		// spr := any(spr).(*Sprite)
 		vector.DrawFilledCircle(screen, spr.x, spr.y, strokeThickness, spr.clr, true)
 		vector.StrokeCircle(screen, spr.x, spr.y, float32(spr.radius), 2, spr.clr, true)
 	}
@@ -51,7 +51,7 @@ func (g *Game[T]) Draw(screen *ebiten.Image) {
 	width, height := ebiten.WindowSize()
 	x, y := ebiten.CursorPosition()
 	if x > 0 && x <= width && y > 0 && y <= height {
-		g.root.forEach(func (node *QNode[T]) bool {
+		g.root.forEach(func (node *QNode[*Sprite]) bool {
 			if !node.marked {
 				return true
 			}
@@ -73,6 +73,6 @@ func drawDebug(screen *ebiten.Image, msgs ...string) {
 	vector.DrawFilledRect(screen, 0, 0, initialScreenWidth*.1, initialScreenHeight*.035 * float32(len(msgs)), color.RGBA{0x7f, 0x00, 0x7f, 0x7f}, true)
 	font := text.FaceWithLineHeight(basicfont.Face7x13, 0)
 	for i, msg := range msgs {
-		text.Draw(screen, msg, font, 5, (i+1)*20, color.White)
+		text.Draw(screen, msg, font, 10, (i+1)*20, color.White)
 	}
 }

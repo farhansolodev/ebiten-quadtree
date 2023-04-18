@@ -33,7 +33,7 @@ func main() {
 	root := NewQNode(sprites, 0, initialScreenWidth, 0, initialScreenHeight, 0)
 	root.generateTree(*maxDepth)
 
-	game := &Game[*Sprite]{root, *maxDepth}
+	game := &Game{root, *maxDepth}
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
