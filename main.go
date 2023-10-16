@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	initialScreenWidth  = 1280
-	initialScreenHeight = 720
+	initialScreenWidth  = 1366
+	initialScreenHeight = 768
 )
 
 func main() {
