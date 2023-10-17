@@ -6,8 +6,8 @@ import (
 )
 
 type Sprite struct {
-	clr color.Color
-	x, y float32
+	clr    color.Color
+	x, y   float32
 	radius uint
 }
 
@@ -25,9 +25,9 @@ func (spr *Sprite) setRandomColor(seed int64) {
 	// so that the color is not too dark
 	const min = 30
 	const max = 256
-	r := uint8(rand.Intn(max-min)+min)
-	g := uint8(rand.Intn(max-min)+min)
-	b := uint8(rand.Intn(max-min)+min)
+	r := uint8(rand.Intn(max-min) + min)
+	g := uint8(rand.Intn(max-min) + min)
+	b := uint8(rand.Intn(max-min) + min)
 	spr.clr = color.RGBA{r, g, b, 255}
 }
 
@@ -35,7 +35,7 @@ func (spr *Sprite) setRandomRadius(seed int64) {
 	rand.Seed(seed)
 	const min = 10
 	const max = 30
-	spr.radius = uint(rand.Intn(max-min)+min)
+	spr.radius = uint(rand.Intn(max-min) + min)
 }
 
 func (spr *Sprite) setRandomInitialPosition(seed int64) {
@@ -43,10 +43,10 @@ func (spr *Sprite) setRandomInitialPosition(seed int64) {
 	min := int(spr.radius)
 
 	maxX := int(initialScreenWidth - spr.radius)
-	spr.x = float32(rand.Intn(maxX-min)+min)
+	spr.x = float32(rand.Intn(maxX-min) + min)
 
 	maxY := int(initialScreenHeight - spr.radius)
-	spr.y = float32(rand.Intn(maxY-min)+min)
+	spr.y = float32(rand.Intn(maxY-min) + min)
 }
 
 func (spr *Sprite) getPosition() (x, y float32) {

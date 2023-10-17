@@ -11,10 +11,10 @@ type Locatable interface {
 
 type QNode[T Locatable] struct {
 	northwest, northeast, southwest, southeast *QNode[T]
-	datapoints []T
-	marked bool
-	x0, x1, y0, y1 float32
-	depth uint
+	datapoints                                 []T
+	marked                                     bool
+	x0, x1, y0, y1                             float32
+	depth                                      uint
 }
 
 func NewQNode[T Locatable](datapoints []T, x0, x1, y0, y1 float32, depth uint) *QNode[T] {
@@ -67,33 +67,34 @@ func (node *QNode[T]) forEach(skip func(node *QNode[T]) bool, maxDepth uint) {
 }
 
 func (node *QNode[T]) markPathTo(x, y float32) {
-		node.marked = true
-		midX, midY := node.getMidValues()
-		if x < midX && y < midY {
-			if node.northwest == nil {
-				return
-			}
-			node.northwest.markPathTo(x, y)
-		} else if x > midX && y < midY {
-			if node.northeast == nil {
-				return
-			}
-			node.northeast.markPathTo(x, y)
-		} else if x < midX && y > midY {
-			if node.southwest == nil {
-				return
-			}
-			node.southwest.markPathTo(x, y)
-		} else if x > midX && y > midY {
-			if node.southeast == nil {
-				return
-			}
-			node.southeast.markPathTo(x, y)
+	node.marked = true
+	midX, midY := node.getMidValues()
+	switch {
+	case x < midX && y < midY:
+		if node.northwest == nil {
+			return
 		}
+		node.northwest.markPathTo(x, y)
+	case x > midX && y < midY:
+		if node.northeast == nil {
+			return
+		}
+		node.northeast.markPathTo(x, y)
+	case x < midX && y > midY:
+		if node.southwest == nil {
+			return
+		}
+		node.southwest.markPathTo(x, y)
+	case x > midX && y > midY:
+		if node.southeast == nil {
+			return
+		}
+		node.southeast.markPathTo(x, y)
+	}
 }
 
 func (node *QNode[T]) generateTree(maxDepth uint) {
-	node.forEach(func (node *QNode[T]) bool {
+	node.forEach(func(node *QNode[T]) bool {
 		nwDatapoints := make([]T, 0)
 		neDatapoints := make([]T, 0)
 		swDatapoints := make([]T, 0)
@@ -101,13 +102,14 @@ func (node *QNode[T]) generateTree(maxDepth uint) {
 		for _, v := range node.datapoints {
 			x, y := v.getPosition()
 			midX, midY := node.getMidValues()
-			if x < midX && y < midY {
+			switch {
+			case x < midX && y < midY:
 				nwDatapoints = append(nwDatapoints, v)
-			} else if x > midX && y < midY {
+			case x > midX && y < midY:
 				neDatapoints = append(neDatapoints, v)
-			} else if x < midX && y > midY {
+			case x < midX && y > midY:
 				swDatapoints = append(swDatapoints, v)
-			} else if x > midX && y > midY {
+			case x > midX && y > midY:
 				seDatapoints = append(seDatapoints, v)
 			}
 		}
@@ -136,12 +138,12 @@ func (node *QNode[T]) generateTree(maxDepth uint) {
 }
 
 func (node *QNode[T]) getMidValues() (x, y float32) {
-	return (node.x0+node.x1)*0.5, (node.y0+node.y1)*0.5
+	return (node.x0 + node.x1) * 0.5, (node.y0 + node.y1) * 0.5
 }
 
 func (node *QNode[T]) String() string {
 	var sb strings.Builder
-	node.forEach(func (node *QNode[T]) bool {		
+	node.forEach(func(node *QNode[T]) bool {
 		midX, midY := node.getMidValues()
 		sb.WriteString(fmt.Sprintf("%s[Node: (%f, %f)]\n", strings.Repeat("-> ", int(node.depth)), midX, midY))
 		return false

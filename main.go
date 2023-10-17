@@ -23,11 +23,11 @@ func main() {
 	ebiten.SetWindowSize(initialScreenWidth, initialScreenHeight)
 	// if *resizable { ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled) }
 	ebiten.SetWindowTitle(os.Args[0])
-	
+
 	sprites := make([]*Sprite, 0, *spriteCount)
 	var i uint
 	for ; i < *spriteCount; i++ {
-		sprites = append(sprites, NewSprite(int64(i) + time.Now().UnixNano()))
+		sprites = append(sprites, NewSprite(int64(i)+time.Now().UnixNano()))
 	}
 
 	root := NewQNode(sprites, 0, initialScreenWidth, 0, initialScreenHeight, 0)
